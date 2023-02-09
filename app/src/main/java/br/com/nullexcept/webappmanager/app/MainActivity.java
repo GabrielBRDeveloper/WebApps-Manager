@@ -1,5 +1,6 @@
 package br.com.nullexcept.webappmanager.app;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -53,6 +55,12 @@ public class MainActivity extends AppCompatActivity {
         checkAndCreateDatabase();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{
+                    Manifest.permission.INSTALL_SHORTCUT,
+                    Manifest.permission.INTERNET
+            },10);
+        }
         if (savedInstanceState == null){
             loadList();
             findViewById(R.id.create).setOnClickListener((vw)->{
