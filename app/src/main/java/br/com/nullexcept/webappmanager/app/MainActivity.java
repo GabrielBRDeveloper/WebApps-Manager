@@ -32,6 +32,7 @@ import org.mozilla.geckoview.GeckoSession;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Objects;
 
 import br.com.nullexcept.webappmanager.R;
 import br.com.nullexcept.webappmanager.config.Config;
@@ -64,17 +65,22 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null){
             loadList();
             findViewById(R.id.create).setOnClickListener((vw)->{
-                String key = null;
-                for (String ky:WEBAPPS.keySet()){
-                    if(!WEBAPPS.get(ky).enable){
-                        key = ky;
-                        break;
-                    }
-                }
-                showDialog(new Config(key));
+                showDialog(new Config(this, findLastFreeSlot()));
             });
         }
 
+        findLastFreeSlot();
+    }
+
+    public String findLastFreeSlot(){
+        String key = null;
+        for (String ky:WEBAPPS.keySet()){
+            if(!Objects.requireNonNull(WEBAPPS.get(ky)).enable){
+                key = ky;
+                break;
+            } else System.out.println(">> Slot ["+ky+"] is in use.");
+        }
+        return key;
     }
 
     private void showDialog(Config config){
@@ -142,10 +148,10 @@ public class MainActivity extends AppCompatActivity {
     private void checkAndCreateDatabase() {
         for (Class clazz: LIST){
             SharedPreferences prefs = getSharedPreferences("webapps", Context.MODE_PRIVATE);
-            Config config = new Config(clazz.getName());
-            config.load(prefs);
+            Config config = new Config(this, clazz.getName());
+            config.load();
             WEBAPPS.put(clazz.getName(), config);
-            config.save(prefs);
+            config.save();
         }
     }
 

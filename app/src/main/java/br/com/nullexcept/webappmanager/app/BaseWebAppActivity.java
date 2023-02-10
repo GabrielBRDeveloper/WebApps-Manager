@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Process;
 import android.view.Window;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,8 +41,17 @@ public class BaseWebAppActivity extends AppCompatActivity  {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        config = new Config(getClass().getName());
-        config.load(getSharedPreferences("webapps",MODE_PRIVATE));
+        config = new Config(this, getClass().getName());
+        config.load();
+        if (!config.enable){
+            Toast.makeText(this, R.string.not_exists, Toast.LENGTH_LONG).show();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                finishAndRemoveTask();
+            } else {
+                finish();
+            }
+            return;
+        }
 
 
         setTitle(config.name);
@@ -52,37 +62,13 @@ public class BaseWebAppActivity extends AppCompatActivity  {
 
             GeckoRuntimeSettings.Builder settings = new GeckoRuntimeSettings.Builder();
             settings = settings.arguments(new String[]{
-                    "profile", getFilesDir().getAbsolutePath(),
-                    "--profile", getFilesDir().getAbsolutePath()
+                    "--profile", config.getProfileDir().getAbsolutePath()
             });
+
+            session.getSettings().setUserAgentOverride(config.user_agent);
 
             runtime = GeckoRuntime.create(this, settings.build());
             session.open(runtime);
-            new Thread(()->{
-                try {
-                    File dir = new File(getFilesDir().getParent(), "icon.png");
-                    dir.getParentFile().mkdirs();
-                    if (dir.exists()){
-                        loadIcon();
-                        return;
-                    }
-                    String url = config.url.substring(config.url.indexOf("://")+3);
-                    if (url.contains("/")){
-                        url = url.substring(0, url.indexOf("/"));
-                    }
-                    URLConnection connection = new URL((config.url.startsWith("https") ? "https" : "http")+"://"+url+"/favicon.ico").openConnection();
-                    connection.connect();
-                    InputStream down = connection.getInputStream();
-                    Bitmap bitmap = BitmapFactory.decodeStream(down);
-                    dir.delete();
-                    if (bitmap.getHeight() < 1 || bitmap.getWidth() < 1)return;
-                    FileOutputStream o = new FileOutputStream(dir);
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, o);
-                    o.close();
-                    bitmap.recycle();
-                    loadIcon();
-                }catch (Exception e){e.printStackTrace();}
-            }).start();
             view.setSession(session);
 
             session.loadUri(config.url);
@@ -92,10 +78,11 @@ public class BaseWebAppActivity extends AppCompatActivity  {
             setTaskDescription(new ActivityManager.TaskDescription(config.name, null, Color.WHITE));
         }
         setTitle(config.name);
+        checkIcon();
     }
 
     private void loadIcon() {
-        File dir = new File(getFilesDir().getParent(), "icon.png");
+        File dir = new File(config.getSaveDir(), "icon.png");
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 setTaskDescription(new ActivityManager.TaskDescription(config.name, BitmapFactory.decodeFile(dir.getAbsolutePath()), Color.WHITE));
@@ -108,24 +95,11 @@ public class BaseWebAppActivity extends AppCompatActivity  {
     @Override
     public void onBackPressed() {
         session.goBack();
-        if(System.currentTimeMillis() - oldTime < 350){
+        //Check double back click
+        if(System.currentTimeMillis() - oldTime < 500){
             super.onBackPressed();
         }
         oldTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public File getFilesDir() {
-        File file = new File(super.getFilesDir(), "instances/"+getClass().getName()+"/files");
-        file.mkdirs();
-        return file;
-    }
-
-    @Override
-    public ApplicationInfo getApplicationInfo() {
-        ApplicationInfo info = super.getApplicationInfo();
-        info.dataDir = getFilesDir().getAbsolutePath();
-        return info;
     }
 
     @Override
@@ -144,8 +118,27 @@ public class BaseWebAppActivity extends AppCompatActivity  {
 
     @Override
     public File getCacheDir() {
-        File file = new File(getFilesDir().getParent(), "cache");
+        File file = new File(config.getSaveDir(), "cache");
         file.mkdirs();
         return file;
+    }
+
+    private void checkIcon(){
+        new Thread(()->{
+            try {
+                File dir = new File(config.getSaveDir(), "icon.png");
+                dir.getParentFile().mkdirs();
+                if (dir.exists()){
+                    loadIcon();
+                    return;
+                }
+
+                String url = config.url.substring(config.url.indexOf("://")+3);
+                if (url.contains("/")){
+                    url = url.substring(0, url.indexOf("/"));
+                }
+                //@TODO Need add code to get Icon from GeckoSession
+            }catch (Exception e){e.printStackTrace();}
+        }).start();
     }
 }

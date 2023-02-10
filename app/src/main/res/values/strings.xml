@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">WebApp Manager</string>
     <string name="make_shortcut">Shortcut created</string>
+    <string name="not_exists">This WebApp not exists.</string>
 </resources>

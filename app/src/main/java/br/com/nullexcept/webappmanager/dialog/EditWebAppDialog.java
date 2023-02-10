@@ -75,11 +75,11 @@ public class EditWebAppDialog {
         if (config.enable){
             layout.findViewById(R.id.delete).setVisibility(View.VISIBLE);
             layout.findViewById(R.id.delete).setOnClickListener(v -> {
+                clearAllData();
                 dialog.hide();
                 config.enable = false;
-                config.save(ctx.getSharedPreferences("webapps", MODE_PRIVATE));
+                config.save();
                 ctx.refreshList();
-                clearAllData();
             });
         } else {
             layout.findViewById(R.id.delete).setVisibility(View.INVISIBLE);
@@ -97,6 +97,7 @@ public class EditWebAppDialog {
         dialog.hide();
         config.name = name.getText()+"";
         config.url = url.getText()+"";
+        config.user_agent = user_agent.getText()+"";
         config.action_bar = show_action.isChecked();
         config.redirects  = allow_redirects.isChecked();
         if (!config.enable){
@@ -104,23 +105,14 @@ public class EditWebAppDialog {
             config.enable = true;
         }
         MainActivity.WEBAPPS.put(config.getBase(), config);
-        config.save(ctx.getSharedPreferences("webapps", MODE_PRIVATE));
+        config.save();
         ctx.refreshList();
     }
 
     private void clearAllData() {
-        File data = new File(ctx.getFilesDir(), "instances/"+config.getBase());
-        data.mkdirs();
-        deleteRecursive(data);
-        data.mkdirs();
+        config.deleteAll();
     }
-    void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles())
-                deleteRecursive(child);
 
-        fileOrDirectory.delete();
-    }
 
     private boolean touchUpdate(View vw, MotionEvent motion){
         checkAndContinue();

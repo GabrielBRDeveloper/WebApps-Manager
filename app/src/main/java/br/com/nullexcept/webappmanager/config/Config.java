@@ -1,9 +1,20 @@
 package br.com.nullexcept.webappmanager.config;
 
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.os.Environment;
 
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoView;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import br.com.nullexcept.webappmanager.util.FileUtils;
 
 public class Config {
     private final String base;
@@ -14,17 +25,48 @@ public class Config {
     public boolean action_bar = false;
     public boolean enable = false;
     public boolean redirects = false;
+    public File data_directory;
+    public Context ctx;
 
-    public Config(String base){
+    public Config(Activity ctx, String base){
         this.base = base;
+        this.data_directory = ctx.getFilesDir();
+        this.ctx = ctx.getApplication();
+        System.out.println("Data directory: "+ ctx.getFilesDir());
     }
 
+    public File getSaveDir(){
+        return mkdirs(new File(data_directory, "instances/"+base));
+    }
+
+    private File mkdirs(File file){
+        file.mkdirs();
+        return file;
+    }
+
+    public File getProfileDir(){
+        return mkdirs(new File(getSaveDir(), "profile"));
+    }
+
+    public void deleteAll(){
+        ArrayList<File> baseDirectory = new ArrayList<>();
+        baseDirectory.addAll(Arrays.asList(ctx.getExternalFilesDirs(null)));
+        baseDirectory.add(ctx.getFilesDir());
+        baseDirectory.add(this.data_directory);
+        for (File file: baseDirectory){
+            FileUtils.delete(new File(file, "instances/"+base));
+        }
+        enable = false;
+        save();
+    }
 
     public String getBase() {
         return base;
     }
 
-    public void load(SharedPreferences prefs){
+    public void load(){
+        SharedPreferences prefs = ctx.getSharedPreferences("webapps",Context.MODE_PRIVATE);
+
         enable = prefs.getBoolean(base, enable);
 
         name         = prefs.getString(base+"/name", name);
@@ -35,7 +77,8 @@ public class Config {
         redirects    = prefs.getBoolean(base+"/redirects", redirects);
     }
 
-    public void save(SharedPreferences prefs){
+    public void save(){
+        SharedPreferences prefs = ctx.getSharedPreferences("webapps",Context.MODE_PRIVATE);
         prefs.edit()
                 .putString(base+"/name", name)
                 .putString(base+"/user_agent", user_agent)
