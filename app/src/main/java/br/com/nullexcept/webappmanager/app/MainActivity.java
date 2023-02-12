@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         checkAndCreateDatabase();
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.main_activity);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[]{
@@ -131,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         link.setIntent(intent);
         link.setLongLabel(config.name);
         link.setShortLabel(config.name);
-        File fIcon = new File(getFilesDir(), "instances/"+config.getBase()+"/icon.png");
+        File fIcon = new File(config.getSaveDir(), "icon.png");
         link.setIcon(IconCompat.createWithResource(this, R.drawable.ic_launcher_background));
         if (fIcon.exists()){
             try {

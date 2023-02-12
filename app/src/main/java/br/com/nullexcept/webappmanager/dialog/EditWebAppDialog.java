@@ -10,12 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
 import org.mozilla.geckoview.GeckoSession;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import br.com.nullexcept.webappmanager.R;
 import br.com.nullexcept.webappmanager.app.MainActivity;
@@ -72,11 +75,54 @@ public class EditWebAppDialog {
         url.setOnTouchListener(this::touchUpdate);
         user_agent.setOnTouchListener(this::touchUpdate);
 
+        if (!config.enable){
+            ArrayList<View> storage_previews = new ArrayList<>();
+            LinearLayout storage_list = layout.findViewById(R.id.storage_list);
+            for (int i = 1; i < storage_list.getChildCount(); i++){
+                storage_previews.add(storage_list.getChildAt(i));
+            }
+
+            File[] list = ctx.getExternalFilesDirs(null);
+            int idx = 0;
+            for (View vw: storage_previews){
+                if (idx+1 > list.length){
+                    storage_list.removeView(vw);
+                } else {
+                    File dir = list[idx];
+                    if (dir.getAbsolutePath().startsWith("/storage/")){
+                        String name = dir.getAbsolutePath().substring(9);
+                        name = name.substring(0, name.indexOf('/'));
+                        ((TextView)vw).setText(name);
+                        vw.setAlpha(0.4f);
+                        vw.setOnClickListener(v -> {
+                            for (int i = 0; i < storage_list.getChildCount(); i++){
+                                storage_list.getChildAt(i).setAlpha(0.4f);
+                            }
+                            v.setAlpha(1.0f);
+                            config.data_directory = dir;
+                        });
+                    }
+                }
+                idx++;
+            }
+
+            storage_list.getChildAt(0).setOnClickListener(v -> {
+                for (int i = 0; i < storage_list.getChildCount(); i++){
+                    storage_list.getChildAt(i).setAlpha(0.4f);
+                }
+                v.setAlpha(1.0f);
+                config.data_directory = ctx.getFilesDir();
+            });
+        } else {
+            layout.findViewById(R.id.create_options).setVisibility(View.INVISIBLE);
+        }
+
+
         if (config.enable){
             layout.findViewById(R.id.delete).setVisibility(View.VISIBLE);
             layout.findViewById(R.id.delete).setOnClickListener(v -> {
                 clearAllData();
-                dialog.hide();
+                dialog.dismiss();
                 config.enable = false;
                 config.save();
                 ctx.refreshList();
@@ -86,7 +132,7 @@ public class EditWebAppDialog {
         }
 
         layout.findViewById(R.id.cancel).setOnClickListener(v -> {
-            dialog.hide();
+            dialog.dismiss();
         });
         layout.findViewById(R.id.save).setOnClickListener(v -> save());
     }
@@ -94,7 +140,7 @@ public class EditWebAppDialog {
     private void save() {
         checkAndContinue();
         if (layout.findViewById(R.id.save).getAlpha() < 1.0)return;
-        dialog.hide();
+        dialog.dismiss();
         config.name = name.getText()+"";
         config.url = url.getText()+"";
         config.user_agent = user_agent.getText()+"";

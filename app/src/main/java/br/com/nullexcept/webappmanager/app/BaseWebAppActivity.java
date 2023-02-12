@@ -110,9 +110,9 @@ public class BaseWebAppActivity extends AppCompatActivity  {
     @Override
     protected void onDestroy() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            finishAndRemoveTask();
+            //finishAndRemoveTask();
+            //Process.killProcess(Process.myPid());
         }
-        Process.killProcess(Process.myPid());
         super.onDestroy();
     }
 

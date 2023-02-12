@@ -32,7 +32,6 @@ public class Config {
         this.base = base;
         this.data_directory = ctx.getFilesDir();
         this.ctx = ctx.getApplication();
-        System.out.println("Data directory: "+ ctx.getFilesDir());
     }
 
     public File getSaveDir(){
@@ -69,6 +68,8 @@ public class Config {
 
         enable = prefs.getBoolean(base, enable);
 
+        data_directory = new File(prefs.getString(base+"/datadir", data_directory.getAbsolutePath()));
+
         name         = prefs.getString(base+"/name", name);
         url          = prefs.getString(base+"/url", url);
         user_agent   = prefs.getString(base+"/user_agent", user_agent);
@@ -80,6 +81,7 @@ public class Config {
     public void save(){
         SharedPreferences prefs = ctx.getSharedPreferences("webapps",Context.MODE_PRIVATE);
         prefs.edit()
+                .putString(base+"/datadir", data_directory.getAbsolutePath())
                 .putString(base+"/name", name)
                 .putString(base+"/user_agent", user_agent)
                 .putString(base+"/url", url)
