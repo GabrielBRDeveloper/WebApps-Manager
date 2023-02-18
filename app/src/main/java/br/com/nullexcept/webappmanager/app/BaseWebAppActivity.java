@@ -1,15 +1,22 @@
 package br.com.nullexcept.webappmanager.app;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Process;
+import android.util.Log;
+import android.view.Menu;
+import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,23 +24,34 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.mozilla.gecko.mozglue.GeckoLoader;
+import org.mozilla.geckoview.AllowOrDeny;
+import org.mozilla.geckoview.GeckoResult;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoRuntimeSettings;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoView;
+import org.mozilla.geckoview.WebExtension;
+import org.mozilla.geckoview.WebExtensionController;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.List;
 
 import br.com.nullexcept.webappmanager.R;
+import br.com.nullexcept.webappmanager.app.basewebapp.DialogOptions;
 import br.com.nullexcept.webappmanager.config.Config;
+import br.com.nullexcept.webappmanager.web.WebSession;
 
 public class BaseWebAppActivity extends AppCompatActivity  {
     Config config;
+    public static BaseWebAppActivity CURRENT_CONTEXT;
+    public static Config             CURRENT_CONFIG;
     public static GeckoSession session;
     public static GeckoRuntime runtime;
 
@@ -43,6 +61,10 @@ public class BaseWebAppActivity extends AppCompatActivity  {
 
         config = new Config(this, getClass().getName());
         config.load();
+        CURRENT_CONFIG = config;
+        CURRENT_CONTEXT = this;
+
+
         if (!config.enable){
             Toast.makeText(this, R.string.not_exists, Toast.LENGTH_LONG).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -53,92 +75,88 @@ public class BaseWebAppActivity extends AppCompatActivity  {
             return;
         }
 
-
         setTitle(config.name);
         setContentView(R.layout.webapp_acitivity);
-        GeckoView view = findViewById(R.id.webview);
-        if (runtime == null){
-            session = new GeckoSession();
 
+        if (session == null){
             GeckoRuntimeSettings.Builder settings = new GeckoRuntimeSettings.Builder();
             settings = settings.arguments(new String[]{
                     "--profile", config.getProfileDir().getAbsolutePath()
             });
-
-            session.getSettings().setUserAgentOverride(config.user_agent);
-
+            session = new WebSession(this);
             runtime = GeckoRuntime.create(this, settings.build());
             session.open(runtime);
-            view.setSession(session);
-
             session.loadUri(config.url);
         }
-        view.setSession(session);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setTaskDescription(new ActivityManager.TaskDescription(config.name, null, Color.WHITE));
+
+        ((GeckoView)findViewById(R.id.webview)).setSession(session);
+        log(session);
+
+        findViewById(R.id.options).setOnClickListener(v -> {
+            new DialogOptions(this).getDialog().show();
+        });
+
+        if (!config.action_bar){
+            findViewById(R.id.header).setVisibility(View.INVISIBLE);
+            findViewById(R.id.content).setPadding(0,0,0,0);
         }
-        setTitle(config.name);
-        checkIcon();
     }
 
-    private void loadIcon() {
-        File dir = new File(config.getSaveDir(), "icon.png");
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                setTaskDescription(new ActivityManager.TaskDescription(config.name, BitmapFactory.decodeFile(dir.getAbsolutePath()), Color.WHITE));
-            }
-        }catch (Exception e){}
+
+    public GeckoRuntime getRuntime() {
+        return runtime;
     }
 
-    private long oldTime = 0;
+    public GeckoSession getSession() {
+        return session;
+    }
 
+    public void error(Object... items){
+        for (Object obj: items){
+            _log(2, obj);
+        }
+    }
+
+    public void log(Object... items){
+        for (Object obj: items){
+            _log(1, obj);
+        }
+    }
+
+    private void _log(int level, Object obj){
+        if (obj instanceof Throwable){
+            try {
+                Throwable th = (Throwable) obj;
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                PrintStream stream = new PrintStream(out);
+                th.printStackTrace(stream);
+                stream.flush();
+                out.close();
+                obj = out.toString("utf8");
+            } catch (Exception e){}
+        }
+        switch (level){
+            case 0: Log.i(getClass().getSimpleName(), obj+""); break;
+            case 1: Log.d(getClass().getSimpleName(), obj+""); break;
+            case 2: Log.e(getClass().getSimpleName(), obj+""); break;
+        }
+    }
+
+
+    private long LAST_BACK = 0;
     @Override
     public void onBackPressed() {
-        session.goBack();
-        //Check double back click
-        if(System.currentTimeMillis() - oldTime < 500){
+        if (System.currentTimeMillis()-LAST_BACK < 500){
             super.onBackPressed();
+        } else {
+            if (session != null){
+                session.goBack();
+            }
         }
-        oldTime = System.currentTimeMillis();
+        LAST_BACK = System.currentTimeMillis();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            //finishAndRemoveTask();
-            //Process.killProcess(Process.myPid());
-        }
-        super.onDestroy();
-    }
-
-    @Override
-    public File getCacheDir() {
-        File file = new File(config.getSaveDir(), "cache");
-        file.mkdirs();
-        return file;
-    }
-
-    private void checkIcon(){
-        new Thread(()->{
-            try {
-                File dir = new File(config.getSaveDir(), "icon.png");
-                dir.getParentFile().mkdirs();
-                if (dir.exists()){
-                    loadIcon();
-                    return;
-                }
-
-                String url = config.url.substring(config.url.indexOf("://")+3);
-                if (url.contains("/")){
-                    url = url.substring(0, url.indexOf("/"));
-                }
-                //@TODO Need add code to get Icon from GeckoSession
-            }catch (Exception e){e.printStackTrace();}
-        }).start();
+    public void loadUrl(String url) {
+        session.loadUri(url);
     }
 }
