@@ -55,23 +55,26 @@
 
     </AbsoluteLayout>
 
-    <LinearLayout
+    <AbsoluteLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingTop="45dp">
 
-        <ProgressBar
-            android:id="@+id/loading_bar"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
-
         <org.mozilla.geckoview.GeckoView
             android:id="@+id/webview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-    </LinearLayout>
+        <br.com.nullexcept.webappmanager.widget.ProgressBar
+            android:id="@+id/loading_bar"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:visibility="invisible"
+            android:progress="25"
+            android:background="#5000"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
+
+    </AbsoluteLayout>
 
 </RelativeLayout>

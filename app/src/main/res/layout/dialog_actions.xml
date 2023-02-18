@@ -15,7 +15,7 @@
 
     <AbsoluteLayout
         android:layout_width="match_parent"
-        android:layout_height="32dp">
+        android:layout_height="45dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -44,7 +44,7 @@
 
     <AbsoluteLayout
         android:layout_width="match_parent"
-        android:layout_height="32dp">
+        android:layout_height="45dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -71,5 +71,10 @@
             android:alpha="0"/>
     </AbsoluteLayout>
 
+    <TextView
+        android:id="@+id/desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"/>
 
 </LinearLayout>

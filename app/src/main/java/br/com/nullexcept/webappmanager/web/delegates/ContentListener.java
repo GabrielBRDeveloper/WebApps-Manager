@@ -12,6 +12,7 @@ import br.com.nullexcept.webappmanager.web.WebSession;
 
 public class ContentListener implements GeckoSession.ContentDelegate {
     private WebSession session;
+    private String TITLE = "WebApp";
     public ContentListener(WebSession session){
         this.session = session;
     }
@@ -20,7 +21,12 @@ public class ContentListener implements GeckoSession.ContentDelegate {
     public void onTitleChange(@NonNull GeckoSession current, @Nullable String title) {
         GeckoSession.ContentDelegate.super.onTitleChange(current, title);
         session.context().runOnUiThread(()->{
+            TITLE = title;
             ((TextView)session.context().findViewById(R.id.title)).setText(title);
         });
+    }
+
+    public String getTitle() {
+        return TITLE;
     }
 }

@@ -1,7 +1,6 @@
 package br.com.nullexcept.webappmanager.web.delegates;
 
 import android.view.View;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 
@@ -10,6 +9,7 @@ import org.mozilla.geckoview.GeckoSession;
 import br.com.nullexcept.webappmanager.R;
 import br.com.nullexcept.webappmanager.web.WebSession;
 
+import br.com.nullexcept.webappmanager.widget.ProgressBar;
 public class ProcessListener implements GeckoSession.ProgressDelegate {
     private WebSession session;
     public ProcessListener(WebSession session){

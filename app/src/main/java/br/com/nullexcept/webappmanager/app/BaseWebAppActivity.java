@@ -81,12 +81,21 @@ public class BaseWebAppActivity extends AppCompatActivity  {
         if (session == null){
             GeckoRuntimeSettings.Builder settings = new GeckoRuntimeSettings.Builder();
             settings = settings.arguments(new String[]{
-                    "--profile", config.getProfileDir().getAbsolutePath()
+                    "--profile", config.getProfileDir().getAbsolutePath(),
+                    "-purgecaches"
             });
+
             session = new WebSession(this);
-            runtime = GeckoRuntime.create(this, settings.build());
+            GeckoRuntimeSettings build = settings.build();
+
+            build.setAboutConfigEnabled(true);
+
+            runtime = GeckoRuntime.create(this, build);
+
             session.open(runtime);
             session.loadUri(config.url);
+        } else {
+            ((WebSession)session).resumeUI();
         }
 
         ((GeckoView)findViewById(R.id.webview)).setSession(session);
@@ -100,6 +109,22 @@ public class BaseWebAppActivity extends AppCompatActivity  {
             findViewById(R.id.header).setVisibility(View.INVISIBLE);
             findViewById(R.id.content).setPadding(0,0,0,0);
         }
+
+        setTaskDescription(new ActivityManager.TaskDescription(config.name));
+        if (new File(config.getSaveDir(), "icon.png").exists()){
+            loadIcon();
+        }
+    }
+
+    private void loadIcon() {
+        new Thread(()->{
+            try {
+                Bitmap icon = BitmapFactory.decodeFile(new File(config.getSaveDir(), "icon.png").getAbsolutePath());
+                if (icon.getWidth() > 1){
+                    setTaskDescription(new ActivityManager.TaskDescription(config.name, icon));
+                }
+            }catch (Exception e){}
+        }).start();
     }
 
 

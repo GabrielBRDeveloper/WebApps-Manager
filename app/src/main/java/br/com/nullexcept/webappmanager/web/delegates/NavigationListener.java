@@ -19,6 +19,7 @@ import br.com.nullexcept.webappmanager.web.WebSession;
 
 public class NavigationListener implements GeckoSession.NavigationDelegate {
     private WebSession session;
+    private String LOCATION = "";
     public NavigationListener(WebSession session){
         this.session = session;
     }
@@ -44,9 +45,14 @@ public class NavigationListener implements GeckoSession.NavigationDelegate {
         return GeckoSession.NavigationDelegate.super.onLoadRequest(session, request);
     }
 
+    public String getLocation() {
+        return LOCATION;
+    }
+
     @Override
     public void onLocationChange(@NonNull GeckoSession current, @Nullable String url, @NonNull List<GeckoSession.PermissionDelegate.ContentPermission> perms) {
         GeckoSession.NavigationDelegate.super.onLocationChange(current, url, perms);
+        LOCATION = url;
         session.context().runOnUiThread(()->{
             ((TextView)session.context().findViewById(R.id.url)).setText(url);
         });
