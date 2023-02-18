@@ -172,7 +172,12 @@ public class BaseWebAppActivity extends AppCompatActivity  {
     @Override
     public void onBackPressed() {
         if (System.currentTimeMillis()-LAST_BACK < 500){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                finishAndRemoveTask();
+            } else finish();
+            Process.killProcess(Process.myPid());
             super.onBackPressed();
+
         } else {
             if (session != null){
                 session.goBack();
