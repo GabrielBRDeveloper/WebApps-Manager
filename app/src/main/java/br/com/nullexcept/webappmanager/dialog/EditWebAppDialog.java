@@ -3,12 +3,16 @@ package br.com.nullexcept.webappmanager.dialog;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.FileUtils;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,6 +23,8 @@ import org.mozilla.geckoview.GeckoSession;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 import br.com.nullexcept.webappmanager.R;
 import br.com.nullexcept.webappmanager.app.MainActivity;
@@ -40,7 +46,8 @@ public class EditWebAppDialog {
     public EditWebAppDialog(Config config, MainActivity ctx){
         this.ctx = ctx;
         this.config = config;
-        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx, R.style.CardDialog);
+
         layout = (ViewGroup) ctx.getLayoutInflater().inflate(R.layout.edit_dialog, null, false);
         name = layout.findViewById(R.id.name);
         user_agent = layout.findViewById(R.id.user_agent);
@@ -76,43 +83,14 @@ public class EditWebAppDialog {
         user_agent.setOnTouchListener(this::touchUpdate);
 
         if (!config.enable){
-            ArrayList<View> storage_previews = new ArrayList<>();
-            LinearLayout storage_list = layout.findViewById(R.id.storage_list);
-            for (int i = 1; i < storage_list.getChildCount(); i++){
-                storage_previews.add(storage_list.getChildAt(i));
+            addStorage("PRIVATE (SAFE)", ctx.getFilesDir());
+            File[] files = ctx.getExternalFilesDirs(null);
+            for (File storage :  files){
+                String[] path = storage.getAbsolutePath().split("/");
+                if (!Objects.equals(path[1], "storage"))continue;
+                String name = path[2].toUpperCase();
+                addStorage(name, storage);
             }
-
-            File[] list = ctx.getExternalFilesDirs(null);
-            int idx = 0;
-            for (View vw: storage_previews){
-                if (idx+1 > list.length){
-                    storage_list.removeView(vw);
-                } else {
-                    File dir = list[idx];
-                    if (dir.getAbsolutePath().startsWith("/storage/")){
-                        String name = dir.getAbsolutePath().substring(9);
-                        name = name.substring(0, name.indexOf('/'));
-                        ((TextView)vw).setText(name);
-                        vw.setAlpha(0.4f);
-                        vw.setOnClickListener(v -> {
-                            for (int i = 0; i < storage_list.getChildCount(); i++){
-                                storage_list.getChildAt(i).setAlpha(0.4f);
-                            }
-                            v.setAlpha(1.0f);
-                            config.data_directory = dir;
-                        });
-                    }
-                }
-                idx++;
-            }
-
-            storage_list.getChildAt(0).setOnClickListener(v -> {
-                for (int i = 0; i < storage_list.getChildCount(); i++){
-                    storage_list.getChildAt(i).setAlpha(0.4f);
-                }
-                v.setAlpha(1.0f);
-                config.data_directory = ctx.getFilesDir();
-            });
         } else {
             layout.findViewById(R.id.create_options).setVisibility(View.INVISIBLE);
         }
@@ -135,6 +113,42 @@ public class EditWebAppDialog {
             dialog.dismiss();
         });
         layout.findViewById(R.id.save).setOnClickListener(v -> save());
+        refreshStorageList();
+    }
+
+
+    private final ArrayList<Object[]> storages = new ArrayList<>();
+    private void addStorage(String name, File directory){
+        ctx.runOnUiThread(()->{
+            LinearLayout storage_list = layout.findViewById(R.id.storage_list);
+            LinearLayout item = (LinearLayout) ctx.getLayoutInflater().inflate(R.layout.node_item_storage_small, storage_list, false);
+
+            View.OnClickListener click = (view)->{
+              config.data_directory = directory.getAbsoluteFile();
+              refreshStorageList();
+            };
+
+            item.setOnClickListener(click);
+            ((CheckBox)item.findViewById(R.id.checkbox)).setOnClickListener(click);
+
+            ((TextView)item.findViewById(R.id.name)).setText(name);
+            storage_list.addView(item);
+            storages.add(new Object[]{
+                    item,
+                    directory.getAbsoluteFile()
+            });
+        });
+    }
+
+    private void refreshStorageList(){
+        ctx.runOnUiThread(()->{
+            for (Object[] items : storages){
+                View view = (View) items[0];
+                File file = (File) items[1];
+                ((CheckBox)view.findViewById(R.id.checkbox))
+                        .setChecked(file.getAbsoluteFile().equals(config.data_directory));
+            }
+        });
     }
 
     private void save() {

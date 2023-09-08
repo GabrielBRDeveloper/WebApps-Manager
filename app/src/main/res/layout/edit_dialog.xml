@@ -3,14 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingHorizontal="20dp">
+    android:paddingHorizontal="20dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="@drawable/box_white1">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingVertical="10dp"
         android:textSize="20dp"
-        android:text="Settings for WebWeb"/>
+        android:text="Settings for Webapp"/>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -24,35 +27,21 @@
                 android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:singleLine="true"
-                android:paddingHorizontal="10dp"
-                android:layout_marginTop="10dp"
-                android:textSize="16dp"
-                android:background="@drawable/box_white"
-                android:hint="name"/>
+                android:hint="name"
+                style="@style/EditDialog1_CardEditText"/>
 
             <EditText
                 android:id="@+id/url"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:singleLine="true"
-                android:paddingHorizontal="10dp"
-                android:layout_marginTop="10dp"
-                android:textSize="16dp"
-                android:background="@drawable/box_white"
+                style="@style/EditDialog1_CardEditText"
                 android:hint="url"/>
-
 
             <EditText
                 android:id="@+id/user_agent"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="false"
-                android:paddingHorizontal="10dp"
-                android:layout_marginTop="10dp"
-                android:textSize="16dp"
-                android:paddingVertical="10dp"
-                android:background="@drawable/box_white"
+                android:layout_height="40dp"
+                style="@style/EditDialog1_CardEditText"
                 android:hint="user agent"/>
 
 
@@ -71,62 +60,16 @@
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:text="Profile Directory: "/>
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-                        <LinearLayout
-                            android:id="@+id/storage_list"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:orientation="horizontal">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="8dp"
-                                android:text="Private (Safe)"
-                                android:paddingHorizontal="10dp"
-                                android:textColor="#FFF"
-                                android:background="@drawable/box1"
-                                android:gravity="center"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="8dp"
-                                android:text="storage1"
-                                android:paddingHorizontal="10dp"
-                                android:textColor="#FFF"
-                                android:background="@drawable/box1"
-                                android:gravity="center"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="8dp"
-                                android:text="storage1"
-                                android:paddingHorizontal="10dp"
-                                android:textColor="#FFF"
-                                android:background="@drawable/box1"
-                                android:gravity="center"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="8dp"
-                                android:text="storage1"
-                                android:paddingHorizontal="10dp"
-                                android:textColor="#FFF"
-                                android:background="@drawable/box1"
-                                android:gravity="center"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="8dp"
-                                android:text="storage1"
-                                android:paddingHorizontal="10dp"
-                                android:textColor="#FFF"
-                                android:background="@drawable/box1"
-                                android:gravity="center"/>
-                        </LinearLayout>
-                    </HorizontalScrollView>
+
                 </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/storage_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
             </LinearLayout>
 
 

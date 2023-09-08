@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="EditDialog1_CardEditText">
+        <item name="android:textColor">#000</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:background">@drawable/box_white</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:textColorHint">#A000</item>
+    </style>
+</resources>

@@ -1,6 +1,7 @@
 package br.com.nullexcept.webappmanager.app;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,7 +12,9 @@ import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.KeyEvent;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -31,6 +34,7 @@ import androidx.core.graphics.drawable.IconCompat;
 import org.mozilla.geckoview.GeckoSession;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Objects;
 
