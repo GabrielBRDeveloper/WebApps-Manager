@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF"
+    android:padding="10dp">
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="75dp">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="75dp"
+            android:padding="14dp"
+            android:layout_height="match_parent"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingVertical="5dp">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="@string/app_name"
+                android:textSize="22dp"
+                android:textColor="#000"/>
+
+
+            <TextView
+                android:id="@+id/version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="@string/app_name"
+                android:textSize="15dp"
+                android:textColor="#A000"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="50dp">
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="16dp"
+                    android:background="@drawable/dark_card"
+                    android:text="OK"/>
+
+            </ScrollView>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:clickable="false"
+            android:orientation="vertical"
+            android:focusable="false">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="right">
+
+                <Button
+                    android:id="@+id/install"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textSize="14dp"
+                    android:text="INSTALL"
+                    android:background="#0000"
+                    android:textColor="#E000"
+                    android:layout_marginRight="20dp"
+                    android:paddingHorizontal="20dp"/>
+
+                <Button
+                    android:id="@+id/cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="20dp"
+                    android:background="#0000"
+                    android:textColor="#E000"
+                    android:text="CANCEL"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

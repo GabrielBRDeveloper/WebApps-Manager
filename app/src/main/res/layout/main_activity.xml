@@ -19,11 +19,12 @@
         android:textSize="24dp"/>
 
     <LinearLayout
-        android:paddingTop="80dp"
-        android:paddingHorizontal="30dp"
+        android:paddingTop="74dp"
+        android:paddingHorizontal="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">

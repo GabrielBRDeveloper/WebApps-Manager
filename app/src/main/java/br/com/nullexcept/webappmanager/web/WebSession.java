@@ -2,19 +2,20 @@ package br.com.nullexcept.webappmanager.web;
 
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.MediaSession;
+import org.mozilla.geckoview.WebExtension;
 
 import br.com.nullexcept.webappmanager.R;
 import br.com.nullexcept.webappmanager.app.BaseWebAppActivity;
 import br.com.nullexcept.webappmanager.config.Config;
-import br.com.nullexcept.webappmanager.web.delegates.ContentListener;
-import br.com.nullexcept.webappmanager.web.delegates.NavigationListener;
-import br.com.nullexcept.webappmanager.web.delegates.ProcessListener;
-import br.com.nullexcept.webappmanager.web.delegates.PromptListener;
-
+import br.com.nullexcept.webappmanager.web.delegates.*;
 public class WebSession extends GeckoSession {
     private Class current;
+    private final PluginPromptListener pluginPromptListener;
     public WebSession(Object current){
         this.current = current.getClass();
         getSettings().setUserAgentOverride(config().user_agent);
@@ -24,11 +25,18 @@ public class WebSession extends GeckoSession {
         setContentDelegate(new ContentListener(this));
         setNavigationDelegate(new NavigationListener(this));
         setPromptDelegate(new PromptListener(this));
+        pluginPromptListener = new PluginPromptListener(this);
     }
 
     public void resumeUI(){
         ((TextView)context().findViewById(R.id.title)).setText(((ContentListener)getContentDelegate()).getTitle());
         ((TextView)context().findViewById(R.id.url)).setText(((NavigationListener)getNavigationDelegate()).getLocation());
+    }
+
+    @Override
+    public void open(@NonNull GeckoRuntime runtime) {
+        super.open(runtime);
+        runtime.getWebExtensionController().setPromptDelegate(pluginPromptListener);
     }
 
     public void log(Object... items){

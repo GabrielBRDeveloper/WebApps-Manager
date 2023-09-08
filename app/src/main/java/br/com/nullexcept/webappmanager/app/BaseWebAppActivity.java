@@ -1,29 +1,19 @@
 package br.com.nullexcept.webappmanager.app;
 
-import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Process;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
-import android.view.Window;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.mozilla.gecko.mozglue.GeckoLoader;
 import org.mozilla.geckoview.AllowOrDeny;
 import org.mozilla.geckoview.GeckoResult;
 import org.mozilla.geckoview.GeckoRuntime;
@@ -31,20 +21,17 @@ import org.mozilla.geckoview.GeckoRuntimeSettings;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoView;
 import org.mozilla.geckoview.WebExtension;
-import org.mozilla.geckoview.WebExtensionController;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.List;
+import java.util.ArrayList;
 
 import br.com.nullexcept.webappmanager.R;
 import br.com.nullexcept.webappmanager.app.basewebapp.DialogOptions;
+import br.com.nullexcept.webappmanager.app.fragments.InstallPluginFragment;
 import br.com.nullexcept.webappmanager.config.Config;
 import br.com.nullexcept.webappmanager.web.WebSession;
 
@@ -54,11 +41,14 @@ public class BaseWebAppActivity extends AppCompatActivity  {
     public static Config             CURRENT_CONFIG;
     public static GeckoSession session;
     public static GeckoRuntime runtime;
+    public Handler handler;
+    private final ArrayList<String> extensions = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        handler = new Handler();
         config = new Config(this, getClass().getName());
         config.load();
         CURRENT_CONFIG = config;
@@ -93,7 +83,7 @@ public class BaseWebAppActivity extends AppCompatActivity  {
             runtime = GeckoRuntime.create(this, build);
 
             session.open(runtime);
-            session.loadUri(config.url);
+            loadUrl(config.url);
         } else {
             ((WebSession)session).resumeUI();
         }
@@ -114,6 +104,19 @@ public class BaseWebAppActivity extends AppCompatActivity  {
         if (new File(config.getSaveDir(), "icon.png").exists()){
             loadIcon();
         }
+
+        new Thread(()->{
+            File extensions = new File(config.getProfileDir(), "/plugins");
+            extensions.mkdirs();
+            File[] list = extensions.listFiles();
+
+            for (File file : list){
+                String uri = file.toURI().toString();
+                runOnUiThread(()-> runtime.getWebExtensionController().install(uri));
+            }
+        }).start();
+
+        refreshExtensions();
     }
 
     private void loadIcon() {
@@ -121,7 +124,9 @@ public class BaseWebAppActivity extends AppCompatActivity  {
             try {
                 Bitmap icon = BitmapFactory.decodeFile(new File(config.getSaveDir(), "icon.png").getAbsolutePath());
                 if (icon.getWidth() > 1){
-                    setTaskDescription(new ActivityManager.TaskDescription(config.name, icon));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        setTaskDescription(new ActivityManager.TaskDescription(config.name, icon));
+                    }
                 }
             }catch (Exception e){}
         }).start();
@@ -171,6 +176,10 @@ public class BaseWebAppActivity extends AppCompatActivity  {
     private long LAST_BACK = 0;
     @Override
     public void onBackPressed() {
+        if (getSupportFragmentManager().getFragments().size() > 0){
+            super.onBackPressed();
+            return;
+        }
         if (System.currentTimeMillis()-LAST_BACK < 500){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 finishAndRemoveTask();
@@ -188,5 +197,55 @@ public class BaseWebAppActivity extends AppCompatActivity  {
 
     public void loadUrl(String url) {
         session.loadUri(url);
+    }
+
+    public URL parseURL(String url){
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void installExtension(WebExtension extension, GeckoResult<AllowOrDeny> result) {
+        if (!extension.location.startsWith("file:")){
+            result.complete(AllowOrDeny.DENY);
+            return;
+        }
+
+        File file = new File(parseURL(extension.location).getPath()).getAbsoluteFile();
+        File pluginFolder = new File(config.getProfileDir(), "/plugins").getAbsoluteFile();
+
+        if (file.equals(pluginFolder.getParentFile())){
+            Toast.makeText(this, "INVALID PLUGIN PATH", Toast.LENGTH_LONG).show();;
+            result.complete(AllowOrDeny.DENY);
+            return;
+        }
+
+
+        InstallPluginFragment fragment = new InstallPluginFragment();
+        fragment.plugin = extension;
+        fragment.result = result;
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    protected void refreshExtensions(){
+        runtime.getWebExtensionController().list().then((ls)->{
+            extensions.clear();
+            for (WebExtension extension : ls){
+                log(String.format(
+                        "----------------------\n"
+                                +"Name: %s\n"
+                                +"Version: %s\n"
+                                +"Enable: %s\n"
+                                +"---------------------", extension.metaData.name, extension.metaData.version, extension.metaData.enabled));
+            }
+            return null;
+        });
     }
 }

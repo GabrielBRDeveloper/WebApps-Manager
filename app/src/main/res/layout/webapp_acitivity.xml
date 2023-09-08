@@ -1,80 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<AbsoluteLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <AbsoluteLayout
-        android:id="@+id/header"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:paddingLeft="20dp"
-        android:gravity="start|center"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <AbsoluteLayout
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:paddingLeft="20dp"
+            android:gravity="start|center"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingRight="32dp">
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000"
+                    android:textSize="16dp"
+                    android:singleLine="true"
+                    android:text="WebApp"/>
+
+                <TextView
+                    android:id="@+id/url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000"
+                    android:textSize="12dp"
+                    android:text="-----"
+                    android:singleLine="true"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingEnd="10dp"
+                android:gravity="end|center">
+                <ImageView
+                    android:id="@+id/options"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:src="@drawable/icon_more_vertical"
+                    android:tint="#444"
+                    tools:ignore="UseAppTint" />
+            </LinearLayout>
+
+
+        </AbsoluteLayout>
+
+        <AbsoluteLayout
+            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingRight="32dp">
+            android:paddingTop="45dp">
 
-            <TextView
-                android:id="@+id/title"
+            <org.mozilla.geckoview.GeckoView
+                android:id="@+id/webview"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#000"
-                android:textSize="16dp"
-                android:singleLine="true"
-                android:text="WebApp"/>
-
-            <TextView
-                android:id="@+id/url"
+                android:layout_height="match_parent"/>
+            <br.com.nullexcept.webappmanager.widget.ProgressBar
+                android:id="@+id/loading_bar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#000"
-                android:textSize="12dp"
-                android:text="-----"
-                android:singleLine="true"/>
-        </LinearLayout>
+                android:layout_height="4dp"
+                android:visibility="invisible"
+                android:progress="25"
+                android:background="#5000"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingEnd="10dp"
-            android:gravity="end|center">
-            <ImageView
-                android:id="@+id/options"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/icon_more_vertical"
-                android:tint="#444"
-                tools:ignore="UseAppTint" />
-        </LinearLayout>
+        </AbsoluteLayout>
 
+    </RelativeLayout>
 
-    </AbsoluteLayout>
-
-    <AbsoluteLayout
-        android:id="@+id/content"
+    <FrameLayout
+        android:id="@+id/fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingTop="45dp">
+        android:layout_height="match_parent"/>
 
-        <org.mozilla.geckoview.GeckoView
-            android:id="@+id/webview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-        <br.com.nullexcept.webappmanager.widget.ProgressBar
-            android:id="@+id/loading_bar"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:visibility="invisible"
-            android:progress="25"
-            android:background="#5000"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
-
-    </AbsoluteLayout>
-
-</RelativeLayout>
+</AbsoluteLayout>

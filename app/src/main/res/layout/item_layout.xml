@@ -14,8 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:orientation="horizontal"
-        android:paddingHorizontal="10dp"
-        android:background="@drawable/box">
+        android:paddingHorizontal="10dp">
 
         <ImageView
             android:id="@+id/icon"
@@ -32,7 +31,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingLeft="32dp"
+                android:paddingLeft="10dp"
                 android:gravity="start|center"
                 android:orientation="vertical">
 
@@ -42,17 +41,38 @@
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:text="Name"
-                    android:textColor="#FFF"
+                    android:textColor="#000"
                     android:textSize="18dp"/>
-                <TextView
-                    android:id="@+id/desc"
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:text="desc"
-                    android:textColor="#FFF"
-                    android:alpha="0.5"
-                    android:textSize="14dp"/>
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/instance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textSize="14dp"
+                        android:textColor="#FFF"
+                        android:background="@drawable/box"
+                        android:paddingVertical="1dp"
+                        android:paddingHorizontal="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="INSTANCE"/>
+
+                    <TextView
+                        android:id="@+id/desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:text="desc"
+                        android:textColor="#000"
+                        android:alpha="0.5"
+                        android:textSize="14dp"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -66,16 +86,6 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:gravity="end|top">
-        <TextView
-            android:id="@+id/instance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:alpha="0.5"
-            android:paddingRight="10dp"
-            android:textSize="8dp"
-            android:textColor="#FFF"
-            android:text="INSTANCE"/>
     </LinearLayout>
 
     <LinearLayout
